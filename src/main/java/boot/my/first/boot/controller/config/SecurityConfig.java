@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -36,7 +37,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest()       //каждый запрос
                 .authenticated()    //должен быть аутефицирован
                 .and()                  //  и
-                .formLogin();  //ЗАМЕНЯЕМ После удаления строк выше и добавления аннотации  @EnableGlobalMethodSecurity(prePostEnabled = true) //.httpBasic();  //с помощью base64 (аутифицирован с помощью base64)
+                .formLogin()  //ЗАМЕНЯЕМ После удаления строк выше и добавления аннотации  @EnableGlobalMethodSecurity(prePostEnabled = true) //.httpBasic();  //с помощью base64 (аутифицирован с помощью base64)
+                .loginPage("/auth/login").permitAll()   //направлям всех на страницу авторизации
+                .defaultSuccessUrl("/auth/success")    //в случае успеха направляем на страницууспеха
+                .and()
+                .logout()       //обращаемся к logout
+                .logoutRequestMatcher(new AntPathRequestMatcher("/auth/logout", "POST"))  //логаутРеквестМатчер должен быть обработан АнтРеквестМатчером по ссылке /auth/logout только методом POST
+                .invalidateHttpSession(true)                //инвалидируй/отмени сессию
+                .clearAuthentication(true)                  //уничтожь аутентификацию
+                .deleteCookies("JSESSIONID")        //удалить куки ДжетСешнайди
+                .logoutSuccessUrl("/auth/login");       //перенаправь на страницу /auth/login
+
 
     }
 
